@@ -289,6 +289,8 @@ class TestApplication < Test::Unit::TestCase
     ARGV << '-f' << '-s' << '-t'
     assert_exception(SystemExit) {
       err = capture_stderr { capture_stdout { @app.run } }
+      require '_dbg'
+      
       assert_no_match(/see full trace/, err)
     }
   ensure

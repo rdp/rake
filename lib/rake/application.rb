@@ -147,7 +147,7 @@ module Rake
       if options.trace
         $stderr.puts ex.backtrace.join("\n")
       else
-        $stderr.puts ex.backtrace.find {|str| str =~ /#{@rakefile}/ } || ""
+        $stderr.puts rakefile_location(ex)
       end
       $stderr.puts "Tasks: #{ex.chain}" if has_chain?(ex)
       $stderr.puts "(See full trace by running task with --trace)" unless options.trace
@@ -568,12 +568,22 @@ module Rake
       @const_warning = true
     end
 
-    def rakefile_location
-      begin
-        fail
-      rescue RuntimeError => ex
-        ex.backtrace.find {|str| str =~ /#{@rakefile}/ } || ""
+    # extract rake filename from backtrace
+    # ex: optional stacktrace to use
+    def rakefile_location ex= nil
+    	if ! ex
+        begin
+          fail
+        rescue RuntimeError => ex        
+        end
       end
+      
+      if windows?
+      	regex = /#{@rakefile}/i # case insensitive filename in doze
+      else
+      	regex = /#{@rakefile}/
+      end
+      ex.backtrace.find {|str| str =~  regex } || ""
     end
   end
 end
